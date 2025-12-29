@@ -105,7 +105,7 @@
             
             <div id="step1-section" class="flex flex-col gap-3 animate-slide-up">
                 <label class="cursor-pointer group">
-                    <input type="radio" name="isShow" value="Y" class="peer hidden" onchange="handleStep1('Y')">
+                    <input type="radio" name="isShow" value="네" class="peer hidden" onchange="handleStep1('Y')">
                     <div class="w-full p-5 rounded-2xl border border-gray-200 bg-white shadow-sm transition-all peer-checked:border-brand peer-checked:bg-brandLight peer-checked:shadow-select flex items-center justify-between">
                         <span class="text-[17px] font-medium text-gray-700 peer-checked:text-brand peer-checked:font-bold">네, 보여드렸어요! 🙆🏻‍♂️</span>
                         <div class="w-5 h-5 rounded-full border border-gray-300 peer-checked:border-brand peer-checked:bg-brand flex items-center justify-center">
@@ -115,7 +115,7 @@
                 </label>
 
                 <label class="cursor-pointer group">
-                    <input type="radio" name="isShow" value="N" class="peer hidden" onchange="handleStep1('N')">
+                    <input type="radio" name="isShow" value="아니요" class="peer hidden" onchange="handleStep1('N')">
                     <div class="w-full p-5 rounded-2xl border border-gray-200 bg-white shadow-sm transition-all peer-checked:border-brand peer-checked:bg-brandLight peer-checked:shadow-select flex items-center justify-between">
                         <span class="text-[17px] font-medium text-gray-700 peer-checked:text-brand peer-checked:font-bold">아니요, 못 보여드렸어요 😢</span>
                         <div class="w-5 h-5 rounded-full border border-gray-300 peer-checked:border-brand peer-checked:bg-brand flex items-center justify-center">
@@ -163,29 +163,26 @@
   </div>
 
   <script>
-    /* =========================================
-       ★ [설정] 제공해주신 구글 시트 웹 앱 URL 적용됨
-       ========================================= */
     const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwC57kFpzrJftiLPtu7H8EzrI-vBAZjRSPxiyOZnPz618AV5DEDhY9BmeMUJiMijfxx/exec";
+    const ETC_KEY = '기타 (직접 입력)'; // 기타 선택 로직을 위한 상수
 
-    /* 1. 질문 데이터 설정 */
+    /* ★ 수정됨: val(값)과 text(보이는 글)를 똑같이 한글로 맞춤 */
     const optionsYes = [
-        { val: 'refuse_owner', text: '사장님이 QR코드 촬영을 거절하셨어요 🙅🏻‍♂️' },
-        { val: 'refuse_staff', text: '직원분이라 권한이 없대요 💦' },
-        { val: 'tech_issue', text: 'QR 인식이 잘 안됐어요 📷' },
-        { val: 'etc', text: '기타 (직접 입력)' }
+        { val: '사장님이 QR코드 촬영을 거절하셨어요 🙅🏻‍♂️', text: '사장님이 QR코드 촬영을 거절하셨어요 🙅🏻‍♂️' },
+        { val: '직원분이라 권한이 없대요 💦', text: '직원분이라 권한이 없대요 💦' },
+        { val: 'QR 인식이 잘 안됐어요 📷', text: 'QR 인식이 잘 안됐어요 📷' },
+        { val: ETC_KEY, text: ETC_KEY }
     ];
 
     const optionsNo = [
-        { val: 'too_busy', text: '매장이 너무 바빠서 말을 못 걸었어요 🏃🏻' }, 
-        { val: 'shy', text: '사장님께 말 걸기가 너무 어색해요 😅' },
-        { val: 'distance', text: '매장이 멀거나 방문할 시간이 없었어요 ⏰' },
-        { val: 'low_reward', text: '혜택이 작아서 안 했어요 💰' },
-        { val: 'owner_absent', text: '매장이 닫혀 있었어요 🚪' }, 
-        { val: 'etc', text: '기타 (직접 입력)' }
+        { val: '매장이 너무 바빠서 말을 못 걸었어요 🏃🏻', text: '매장이 너무 바빠서 말을 못 걸었어요 🏃🏻' }, 
+        { val: '사장님께 말 걸기가 너무 어색해요 😅', text: '사장님께 말 걸기가 너무 어색해요 😅' },
+        { val: '매장이 멀거나 방문할 시간이 없었어요 ⏰', text: '매장이 멀거나 방문할 시간이 없었어요 ⏰' },
+        { val: '혜택이 작아서 안 했어요 💰', text: '혜택이 작아서 안 했어요 💰' },
+        { val: '매장이 닫혀 있었어요 🚪', text: '매장이 닫혀 있었어요 🚪' }, 
+        { val: ETC_KEY, text: ETC_KEY }
     ];
 
-    /* 2. 상태 관리 */
     const progressBar = document.getElementById('progress-bar');
     const step2Container = document.getElementById('step2-container');
     const step2Title = document.getElementById('step2-title');
@@ -193,22 +190,17 @@
     const etcInputWrapper = document.getElementById('etc-input-wrapper');
     const submitBtn = document.getElementById('submit-btn');
     
-    // 유니크 ID 생성
     document.getElementById('submissionId').value = 'SUR-' + Date.now();
 
-    /* 3. 로직 함수 */
     function handleStep1(answer) {
-        // 프로그레스 업데이트
         progressBar.style.width = "70%";
-
-        // Step 2 영역 보이기
+        
         step2Container.classList.remove('hidden');
         setTimeout(() => {
             step2Container.classList.remove('opacity-0');
             step2Container.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }, 10);
 
-        // 초기화 및 데이터 렌더링
         step2Options.innerHTML = '';
         etcInputWrapper.classList.add('hidden');
         submitBtn.disabled = true;
@@ -239,7 +231,8 @@
 
     function handleStep2(value) {
         progressBar.style.width = "90%";
-        if(value === 'etc') {
+        // ★ 수정됨: 한글 '기타' 텍스트를 체크
+        if(value === ETC_KEY) {
             etcInputWrapper.classList.remove('hidden');
         } else {
             etcInputWrapper.classList.add('hidden');
@@ -259,17 +252,14 @@
         }
     }
 
-    /* 4. 제출 핸들러 */
     document.getElementById('survey-form').addEventListener('submit', function(e) {
         e.preventDefault();
         
-        // 로딩 UI
         submitBtn.innerHTML = `<svg class="animate-spin h-5 w-5 text-white mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> 제출 중...`;
         progressBar.style.width = "100%";
 
         const formData = new FormData(this);
         
-        // 구글 시트 전송 로직
         fetch(GAS_WEB_APP_URL, { 
              method: 'POST', 
              body: formData, 
