@@ -3,384 +3,368 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  
   <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css" />
   <script src="https://cdn.tailwindcss.com"></script>
-  
   <script>
     tailwind.config = {
       theme: {
         extend: {
-          fontFamily: {
-            sans: ['Pretendard', '-apple-system', 'BlinkMacSystemFont', 'system-ui', 'Roboto', 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', 'sans-serif'],
-          },
-          colors: { 
-            brand: '#ff7949', 
-            brandLight: '#fff1ec',
-            brandDark: '#132d48', 
-            grayBg: '#F7F8FA', 
-            inputBg: '#F2F4F6',
-            error: '#FF4B4B' 
-          },
-          boxShadow: {
-            'btn': '0 8px 20px -4px rgba(255, 121, 73, 0.4)',
-            'card': '0 4px 20px rgba(0, 0, 0, 0.04)',
-            'select': '0 0 0 2px #ff7949',
-          },
-          animation: {
-            'slide-up': 'slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards',
-            'fade-in': 'fadeIn 0.3s ease-out forwards',
-          },
+          fontFamily: { sans: ['Pretendard', 'sans-serif'] },
+          colors: { brand: '#ff7949', brandLight: '#fff1ec', inputBg: '#F2F4F6' },
+          boxShadow: { 'btn': '0 8px 20px -4px rgba(255, 121, 73, 0.4)', 'card': '0 4px 20px rgba(0, 0, 0, 0.04)', 'select': '0 0 0 2px #ff7949' },
+          animation: { 'slide-up': 'slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards', 'fade-in': 'fadeIn 0.3s ease-out forwards' },
           keyframes: {
-            slideUp: {
-              '0%': { transform: 'translateY(20px)', opacity: '0' },
-              '100%': { transform: 'translateY(0)', opacity: '1' }
-            },
-            fadeIn: {
-              '0%': { opacity: '0' },
-              '100%': { opacity: '1' }
-            }
+            slideUp: { '0%': { transform: 'translateY(20px)', opacity: '0' }, '100%': { transform: 'translateY(0)', opacity: '1' } },
+            fadeIn: { '0%': { opacity: '0' }, '100%': { opacity: '1' } }
           }
         }
       }
     }
   </script>
-
   <style>
-    html, body {
-      overscroll-behavior-y: none;
-      touch-action: pan-y;
-      height: 100%;
-      background-color: #ffffff;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .safe-area-padding {
-      padding-top: env(safe-area-inset-top);
-      padding-bottom: env(safe-area-inset-bottom);
-    }
-    .radio-card:has(input:checked) {
-      border-color: #ff7949;
-      background-color: #fff1ec;
-      color: #ff7949;
-      font-weight: 700;
-    }
-    .radio-card:has(input:checked) .check-icon {
-      background-color: #ff7949;
-      border-color: #ff7949;
-    }
-    .radio-card:has(input:checked) .check-icon svg {
-      display: block;
-    }
+    html, body { overscroll-behavior-y: none; background-color: #ffffff; -webkit-tap-highlight-color: transparent; height: 100%; }
+    .safe-area-padding { padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); }
+    .radio-card:has(input:checked) { border-color: #ff7949; background-color: #fff1ec; color: #ff7949; font-weight: 700; }
+    .radio-card:has(input:checked) .check-icon { background-color: #ff7949; border-color: #ff7949; }
+    .radio-card:has(input:checked) .check-icon svg { display: block; }
+    .step-content { display: none; }
+    .step-content.active { display: block; }
   </style>
   <title>설문조사</title>
 </head>
-
 <body class="bg-white text-gray-900 font-sans flex flex-col min-h-[100dvh]">
 
   <div class="fixed top-0 left-0 w-full h-1 bg-gray-100 z-50">
-    <div id="progress-bar" class="h-full bg-brand w-[20%] rounded-r-full transition-all duration-500"></div>
+    <div id="progress-bar" class="h-full bg-brand w-[0%] transition-all duration-500"></div>
   </div>
 
-  <div class="w-full flex-1 flex flex-col safe-area-padding max-w-[480px] mx-auto relative">
-    
-    <div id="form-container" class="flex-1 px-6 pt-12 pb-10 flex flex-col">
-        
-        <header class="mb-8 text-center flex flex-col items-center">
-            <div class="inline-flex items-center gap-1.5 bg-gray-100 text-gray-500 px-3 py-1 rounded-full mb-4">
-                <span class="text-[12px] font-bold tracking-tight">설문 조사</span>
-            </div>
-            
-            <h1 class="text-[24px] font-bold text-[#191F28] leading-[1.3] tracking-tight break-keep">
-                <br>참여 방법을 확인하시고<br>사장님(직원)께 <span class="text-brand">QR 코드</span>를<br>
-                보여드리는 데 성공하셨나요?
+  <div id="main-view" class="w-full flex-1 flex flex-col safe-area-padding max-w-[480px] mx-auto px-6 pt-12 pb-10">
+    <form id="survey-form" class="flex flex-col flex-1">
+      <input type="hidden" name="submissionId" id="submissionId">
+      <input type="hidden" name="storeName" id="storeNameInput">
+      <input type="hidden" name="utm" id="utmInput">
+
+      <div id="step-1" class="step-content active animate-slide-up">
+        <header class="mb-8">
+            <div class="inline-flex items-center bg-gray-100 text-gray-500 px-3 py-1 rounded-full mb-4 font-bold text-[12px]">질문 1번</div>
+            <h1 class="text-[24px] font-bold text-[#191F28] leading-[1.3] break-keep">
+                소상공인 상생 프로젝트 참여 전, <br><span class="text-brand">'패스오더'</span>라는 서비스를 <br>알고 계셨나요?
             </h1>
-            <p class="text-gray-400 text-[15px] mt-2 leading-snug">
-                솔직하게 알려주시면 다음 이벤트 준비에<br>큰 도움이 됩니다.
-            </p>
         </header>
+        <div class="flex flex-col gap-3">
+            <label class="radio-card cursor-pointer p-5 border border-gray-200 rounded-2xl shadow-card transition-all flex items-center justify-between">
+                <input type="radio" name="q1" value="전혀 몰랐다" class="hidden" onchange="handleSelect(this, 2, 16)">
+                <span class="text-[17px]">전혀 몰랐어요</span>
+            </label>
+            <label class="radio-card cursor-pointer p-5 border border-gray-200 rounded-2xl shadow-card transition-all flex items-center justify-between">
+                <input type="radio" name="q1" value="이름만 들어봤다" class="hidden" onchange="handleSelect(this, 2, 16)">
+                <span class="text-[17px]">이름만 들어봤어요</span>
+            </label>
+            <label class="radio-card cursor-pointer p-5 border border-gray-200 rounded-2xl shadow-card transition-all flex items-center justify-between">
+                <input type="radio" name="q1" value="사용해 본 적이 있다 (현재 이용 중 포함)" class="hidden" onchange="handleSelect(this, 2, 16)">
+                <span class="text-[17px]">실제로 사용해봤어요</span>
+            </label>
+        </div>
+      </div>
 
-        <form id="survey-form" class="flex flex-col flex-1">
-            <input type="hidden" name="submissionId" id="submissionId">
-            <input type="hidden" name="reason" id="finalReasonInput">
-            <input type="hidden" name="storeName" id="storeNameInput">
-            
-            <div id="step1-section" class="flex flex-col gap-3 animate-slide-up">
-                <label class="cursor-pointer group">
-                    <input type="radio" name="isShow" value="네" class="peer hidden" onchange="handleStep1('Y')">
-                    <div class="w-full p-5 rounded-2xl border border-gray-200 bg-white shadow-sm transition-all peer-checked:border-brand peer-checked:bg-brandLight peer-checked:shadow-select flex items-center justify-between">
-                        <span class="text-[17px] font-medium text-gray-700 peer-checked:text-brand peer-checked:font-bold">네, 보여드렸어요 🙆‍♂️</span>
-                        <div class="w-5 h-5 rounded-full border border-gray-300 peer-checked:border-brand peer-checked:bg-brand flex items-center justify-center">
-                            <svg class="w-3 h-3 text-white hidden peer-checked:block" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
-                        </div>
-                    </div>
+      <div id="step-2" class="step-content animate-slide-up">
+        <header class="mb-8">
+            <div class="inline-flex items-center bg-gray-100 text-gray-500 px-3 py-1 rounded-full mb-4 font-bold text-[12px]">질문 2번</div>
+            <h1 class="text-[24px] font-bold text-[#191F28] leading-[1.3] break-keep">
+                어떤 홍보물에 있는 <span class="text-brand">'QR코드'</span>를 <br>스캔하여 프로젝트에 참여하셨나요?
+            </h1>
+        </header>
+        <div class="flex flex-col gap-3">
+            <label class="radio-card cursor-pointer p-5 border border-gray-200 rounded-2xl flex items-center justify-between shadow-card">
+                <input type="radio" name="q2" value="매장에 부착/비치된 A4 사이즈 홍보물" class="hidden" onchange="handleSelect(this, 3, 32)">
+                <span class="text-[17px]">A4 사이즈 홍보물에 있는 QR코드</span>
+            </label>
+            <label class="radio-card cursor-pointer p-5 border border-gray-200 rounded-2xl flex items-center justify-between shadow-card">
+                <input type="radio" name="q2" value="작고 간편한 명함 형태의 홍보물" class="hidden" onchange="handleSelect(this, 3, 32)">
+                <span class="text-[17px]">명함 형태의 홍보물에 있는 QR코드</span>
+            </label>
+            <div class="space-y-3">
+                <label class="radio-card cursor-pointer p-5 border border-gray-200 rounded-2xl flex items-center justify-between shadow-card">
+                    <input type="radio" name="q2" value="기타" class="hidden" onchange="showEtc('q2')">
+                    <span class="text-[17px]">기타 (직접 입력)</span>
                 </label>
-
-                <label class="cursor-pointer group">
-                    <input type="radio" name="isShow" value="아니요" class="peer hidden" onchange="handleStep1('N')">
-                    <div class="w-full p-5 rounded-2xl border border-gray-200 bg-white shadow-sm transition-all peer-checked:border-brand peer-checked:bg-brandLight peer-checked:shadow-select flex items-center justify-between">
-                        <span class="text-[17px] font-medium text-gray-700 peer-checked:text-brand peer-checked:font-bold">아니요, 못 보여드렸어요 🙅</span>
-                        <div class="w-5 h-5 rounded-full border border-gray-300 peer-checked:border-brand peer-checked:bg-brand flex items-center justify-center">
-                            <svg class="w-3 h-3 text-white hidden peer-checked:block" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
-                        </div>
-                    </div>
-                </label>
-
-                <label class="cursor-pointer group">
-                    <input type="radio" name="isShow" value="이벤트 참여 방법을 정확히 모르겠어요" class="peer hidden" onchange="handleStep1('DK')">
-                    <div class="w-full p-5 rounded-2xl border border-gray-200 bg-white shadow-sm transition-all peer-checked:border-brand peer-checked:bg-brandLight peer-checked:shadow-select flex items-center justify-between">
-                        <span class="text-[17px] font-medium text-gray-700 peer-checked:text-brand peer-checked:font-bold">참여 방법을 이해하지 못 했어요 😭</span>
-                        <div class="w-5 h-5 rounded-full border border-gray-300 peer-checked:border-brand peer-checked:bg-brand flex items-center justify-center">
-                            <svg class="w-3 h-3 text-white hidden peer-checked:block" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
-                        </div>
-                    </div>
-                </label>
-            </div>
-
-            <div id="step2-container" class="mt-8 hidden opacity-0 transition-opacity duration-500">
-                <h2 id="step2-title" class="text-[18px] font-bold text-gray-800 mb-4 animate-slide-up"></h2>
-                <div id="step2-options" class="flex flex-col gap-3 animate-slide-up" style="animation-delay: 0.1s;"></div>
-
-                <div id="etc-input-wrapper" class="hidden mt-3 animate-fade-in">
-                    <input type="text" name="etcReason" placeholder="내용을 입력해주세요" class="w-full bg-inputBg border-transparent px-5 h-[3.5rem] rounded-xl text-[16px] outline-none placeholder-gray-400 focus:ring-2 focus:ring-brand focus:bg-white transition-all">
+                <div id="q2_etc_wrapper" class="hidden animate-fade-in space-y-3">
+                    <input type="text" id="q2_etc" placeholder="내용을 입력해주세요" oninput="validateEtc('q2')" class="w-full bg-inputBg px-5 h-14 rounded-xl outline-none focus:ring-2 focus:ring-brand">
+                    <button type="button" id="q2_btn" disabled onclick="handleEtcSubmit('q2', 3, 32)" class="w-full h-14 bg-gray-200 text-white rounded-2xl font-bold">다음 단계로</button>
                 </div>
-            </div>
-
-            <div id="step3-container" class="mt-8 hidden opacity-0 transition-opacity duration-500 border-t border-dashed border-gray-200 pt-8">
-                <div class="bg-blue-50 text-blue-600 px-3 py-1 rounded-full inline-block text-[12px] font-bold mb-3 animate-slide-up">
-                    추가 질문
-                </div>
-                <h2 class="text-[18px] font-bold text-gray-800 mb-4 animate-slide-up">
-                    다른 매장에서도 참여할 수 있다면,<br>또 참여하시겠어요?
-                </h2>
-                
-                <div class="flex flex-col gap-3 animate-slide-up" style="animation-delay: 0.1s;">
-                    <label class="radio-card cursor-pointer group">
-                        <input type="radio" name="rePart" value="네, 무조건 할래요" class="peer hidden" onchange="handleStep3()">
-                        <div class="w-full p-4 rounded-xl border border-gray-200 bg-white shadow-card transition-all flex items-center justify-between hover:bg-gray-50">
-                            <span class="text-[16px] text-gray-600">네, 무조건 할래요</span>
-                            <div class="check-icon w-5 h-5 rounded-full border border-gray-300 flex items-center justify-center transition-colors">
-                                <svg class="w-3 h-3 text-white hidden" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
-                            </div>
-                        </div>
-                    </label>
-
-                    <label class="radio-card cursor-pointer group">
-                        <input type="radio" name="rePart" value="아니요, 한 번으로 충분해요" class="peer hidden" onchange="handleStep3()">
-                        <div class="w-full p-4 rounded-xl border border-gray-200 bg-white shadow-card transition-all flex items-center justify-between hover:bg-gray-50">
-                            <span class="text-[16px] text-gray-600">아니요, 한 번으로 충분해요</span>
-                            <div class="check-icon w-5 h-5 rounded-full border border-gray-300 flex items-center justify-center transition-colors">
-                                <svg class="w-3 h-3 text-white hidden" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
-                            </div>
-                        </div>
-                    </label>
-                </div>
-            </div>
-
-            <div class="mt-auto pt-8">
-                <button type="submit" id="submit-btn" disabled class="w-full bg-gray-300 text-white h-[3.75rem] rounded-2xl text-[17px] font-bold shadow-none transition-all flex justify-center items-center gap-2">
-                    제출하기
-                </button>
-            </div>
-        </form>
-    </div>
-
-    <div id="success-view" class="hidden flex-col justify-center items-center w-full h-full fixed top-0 left-0 bg-white z-[100] px-6 safe-area-padding">
-        <div class="mb-6 animate-slide-up">
-            <div class="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mx-auto">
-                <svg class="w-10 h-10 text-green-500" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"></path>
-                </svg>
             </div>
         </div>
-        <h2 class="text-[#191F28] font-bold text-[24px] leading-tight mb-3 text-center animate-slide-up" style="animation-delay: 0.1s;">
-            소중한 의견 감사합니다!
-        </h2>
-        <p class="text-[#8B95A1] text-[16px] leading-relaxed text-center animate-slide-up" style="animation-delay: 0.2s;">
-            보내주신 내용을 바탕으로<br>더 좋은 이벤트를 준비할게요.
-        </p>
-    </div>
+      </div>
 
+      <div id="step-3" class="step-content animate-slide-up">
+        <header class="mb-8">
+            <div class="inline-flex items-center bg-gray-100 text-gray-500 px-3 py-1 rounded-full mb-4 font-bold text-[12px]">질문 3번</div>
+            <h1 class="text-[24px] font-bold text-[#191F28] leading-[1.3] break-keep">
+                해당 <span class="text-brand">'홍보물'</span>은 어떤 방법으로 <br>확인하셨나요?
+            </h1>
+        </header>
+        <div class="flex flex-col gap-3">
+            <label class="radio-card cursor-pointer p-5 border border-gray-200 rounded-2xl flex items-center shadow-card">
+                <input type="radio" name="q3" value="본인이 직접 우편/택배를 개봉하여 확인했다" class="hidden" onchange="handleSelect(this, 4, 48)">
+                <span class="text-[17px]">직접 우편/택배를 개봉하여 확인했어요</span>
+            </label>
+            <label class="radio-card cursor-pointer p-5 border border-gray-200 rounded-2xl flex items-center shadow-card">
+                <input type="radio" name="q3" value="동료나 주변 사람에게 전달받아 확인했다" class="hidden" onchange="handleSelect(this, 4, 48)">
+                <span class="text-[17px]">동료에게 전달받아 확인했어요</span>
+            </label>
+            <div class="space-y-3">
+                <label class="radio-card cursor-pointer p-5 border border-gray-200 rounded-2xl flex items-center shadow-card">
+                    <input type="radio" name="q3" value="기타" class="hidden" onchange="showEtc('q3')">
+                    <span class="text-[17px]">기타 (직접 입력)</span>
+                </label>
+                <div id="q3_etc_wrapper" class="hidden animate-fade-in space-y-3">
+                    <input type="text" id="q3_etc" placeholder="내용을 입력해주세요" oninput="validateEtc('q3')" class="w-full bg-inputBg px-5 h-14 rounded-xl outline-none focus:ring-2 focus:ring-brand">
+                    <button type="button" id="q3_btn" disabled onclick="handleEtcSubmit('q3', 4, 48)" class="w-full h-14 bg-gray-200 text-white rounded-2xl font-bold">다음 단계로</button>
+                </div>
+            </div>
+        </div>
+      </div>
+
+      <div id="step-4" class="step-content animate-slide-up">
+        <header class="mb-8">
+            <div class="inline-flex items-center bg-gray-100 text-gray-500 px-3 py-1 rounded-full mb-4 font-bold text-[12px]">질문 4번</div>
+            <h1 class="text-[24px] font-bold text-[#191F28] leading-[1.3] break-keep">
+                지급받으신 <span class="text-brand">쿠폰</span>을 실제로 <br>사용하셨나요?
+            </h1>
+        </header>
+        <div class="flex flex-col gap-3">
+            <label class="radio-card cursor-pointer p-5 border border-gray-200 rounded-2xl shadow-card flex items-center justify-between">
+                <input type="radio" name="q4" value="Y" class="hidden" onchange="handleSelect(this, 5, 64)">
+                <span class="text-[17px]">네, 사용했어요</span>
+            </label>
+            <label class="radio-card cursor-pointer p-5 border border-gray-200 rounded-2xl shadow-card flex items-center justify-between">
+                <input type="radio" name="q4" value="N" class="hidden" onchange="handleSelect(this, '4-1', 55)">
+                <span class="text-[17px]">아니요, 사용하지 않았어요</span>
+            </label>
+        </div>
+      </div>
+
+      <div id="step-4-1" class="step-content animate-slide-up">
+        <header class="mb-8">
+            <div class="inline-flex items-center bg-gray-100 text-gray-500 px-3 py-1 rounded-full mb-4 font-bold text-[12px]">질문 4-1번</div>
+            <h2 class="text-[22px] font-bold text-[#191F28] leading-[1.3] break-keep">
+                쿠폰을 사용하지 않으신 <span class="text-brand">'이유'</span>는 <br>무엇인가요?
+            </h2>
+        </header>
+        <div class="flex flex-col gap-3">
+            <label class="radio-card cursor-pointer p-4 border rounded-xl shadow-card flex items-center"><input type="radio" name="q4_reason" value="방법 복잡" class="hidden" onchange="handleSelect(this, 5, 64)"><span>쿠폰 사용 방법이 복잡하거나 어려워서</span></label>
+            <label class="radio-card cursor-pointer p-4 border rounded-xl shadow-card flex items-center"><input type="radio" name="q4_reason" value="기간 만료" class="hidden" onchange="handleSelect(this, 5, 64)"><span>깜빡하고 유효기간 내에 사용하지 못해서</span></label>
+            <label class="radio-card cursor-pointer p-4 border rounded-xl shadow-card flex items-center"><input type="radio" name="q4_reason" value="주문 습관 없음" class="hidden" onchange="handleSelect(this, 5, 64)"><span>평소에 앱을 이용해 주문하는 습관이 없어서</span></label>
+            <label class="radio-card cursor-pointer p-4 border rounded-xl shadow-card flex items-center"><input type="radio" name="q4_reason" value="혜택 작음" class="hidden" onchange="handleSelect(this, 5, 64)"><span>혜택이 작다고 느껴져서</span></label>
+            <div class="space-y-3">
+                <label class="radio-card cursor-pointer p-4 border rounded-xl shadow-card flex items-center"><input type="radio" name="q4_reason" value="기타" class="hidden" onchange="showEtc('q4_reason')"><span>기타 (직접 입력)</span></label>
+                <div id="q4_reason_etc_wrapper" class="hidden animate-fade-in space-y-3">
+                    <input type="text" id="q4_reason_etc" placeholder="내용을 입력해주세요" oninput="validateEtc('q4_reason')" class="w-full bg-inputBg px-5 h-14 rounded-xl outline-none focus:ring-2 focus:ring-brand">
+                    <button type="button" id="q4_reason_btn" disabled onclick="handleEtcSubmit('q4_reason', 5, 64)" class="w-full h-14 bg-gray-200 text-white rounded-2xl font-bold">다음 단계로</button>
+                </div>
+            </div>
+        </div>
+      </div>
+
+      <div id="step-5" class="step-content animate-slide-up">
+        <header class="mb-8">
+            <div class="inline-flex items-center bg-gray-100 text-gray-500 px-3 py-1 rounded-full mb-4 font-bold text-[12px]">질문 5번</div>
+            <h1 class="text-[24px] font-bold text-[#191F28] leading-[1.3] break-keep">
+                동료들에게 프로젝트 참여 홍보물을 <br>직접<span class="text-brand"> '전달'</span>해 보신 적이 있나요?
+            </h1>
+        </header>
+        <div class="flex flex-col gap-3">
+            <label class="radio-card cursor-pointer p-5 border border-gray-200 rounded-2xl shadow-card flex items-center justify-between">
+                <input type="radio" name="q5" value="Y" class="hidden" onchange="handleSelect(this, '5-1', 80)">
+                <span class="text-[17px]">네, 전달했어요</span>
+            </label>
+            <label class="radio-card cursor-pointer p-5 border border-gray-200 rounded-2xl shadow-card flex items-center justify-between">
+                <input type="radio" name="q5" value="N" class="hidden" onchange="handleSelect(this, '5-2', 80)">
+                <span class="text-[17px]">아니요, 전달하지 않았어요</span>
+            </label>
+        </div>
+      </div>
+
+      <div id="step-5-1" class="step-content animate-slide-up">
+        <header class="mb-8">
+            <div class="inline-flex items-center bg-gray-100 text-gray-500 px-3 py-1 rounded-full mb-4 font-bold text-[12px]">질문 5번</div>
+            <h2 class="text-[22px] font-bold text-[#191F28] mb-8">동료에게 전달하신 <span class="text-brand">가장 큰 이유</span>는 <br>무엇인가요?</h2>
+        </header>
+        <div class="flex flex-col gap-3">
+            <label class="radio-card cursor-pointer p-4 border rounded-xl shadow-card flex items-center"><input type="radio" name="q5_1" value="실질적 도움" class="hidden" onchange="handleSelect(this, 6, 95)"><span>혜택이 동료에게 도움이 된다고 생각해서</span></label>
+            <label class="radio-card cursor-pointer p-4 border rounded-xl shadow-card flex items-center"><input type="radio" name="q5_1" value="서비스 유익" class="hidden" onchange="handleSelect(this, 6, 95)"><span>프로젝트가 소상공인에게 도움이 된다고 느껴서</span></label>
+            <label class="radio-card cursor-pointer p-4 border rounded-xl shadow-card flex items-center"><input type="radio" name="q5_1" value="방법 쉽고 간단" class="hidden" onchange="handleSelect(this, 6, 95)"><span>참여 방법이 쉽고 간단해서</span></label>
+            <label class="radio-card cursor-pointer p-4 border rounded-xl shadow-card flex items-center"><input type="radio" name="q5_1" value="정보 공유" class="hidden" onchange="handleSelect(this, 6, 95)"><span>동료들과 좋은 정보를 나누고 싶어서</span></label>
+            <div class="space-y-3">
+                <label class="radio-card cursor-pointer p-4 border rounded-xl shadow-card flex items-center"><input type="radio" name="q5_1" value="기타" class="hidden" onchange="showEtc('q5_1')"><span>기타 (직접 입력)</span></label>
+                <div id="q5_1_etc_wrapper" class="hidden animate-fade-in space-y-3">
+                    <input type="text" id="q5_1_etc" placeholder="내용을 입력해주세요" oninput="validateEtc('q5_1')" class="w-full bg-inputBg px-5 h-14 rounded-xl outline-none focus:ring-2 focus:ring-brand">
+                    <button type="button" id="q5_1_btn" disabled onclick="handleEtcSubmit('q5_1', 6, 95)" class="w-full h-14 bg-gray-200 text-white rounded-2xl font-bold">다음 단계로</button>
+                </div>
+            </div>
+        </div>
+      </div>
+
+      <div id="step-5-2" class="step-content animate-slide-up">
+        <header class="mb-8">
+            <div class="inline-flex items-center bg-gray-100 text-gray-500 px-3 py-1 rounded-full mb-4 font-bold text-[12px]">질문 5번</div>
+            <h2 class="text-[22px] font-bold text-[#191F28] mb-8">주변 동료에게 전달하지 않으신 <span class="text-brand"><br>이유</span>는 무엇인가요?</h2>
+        </header>
+        <div class="flex flex-col gap-3">
+            <label class="radio-card cursor-pointer p-4 border rounded-xl shadow-card flex items-center"><input type="radio" name="q5_2" value="공유 기회 없음" class="hidden" onchange="handleSelect(this, 6, 95)"><span>딱히 전달할 만한 기회가 없어서</span></label>
+            <label class="radio-card cursor-pointer p-4 border rounded-xl shadow-card flex items-center"><input type="radio" name="q5_2" value="방법 번거로움" class="hidden" onchange="handleSelect(this, 6, 95)"><span>프로젝트를 설명하거나 전달하는 방법이 번거로워서</span></label>
+            <label class="radio-card cursor-pointer p-4 border rounded-xl shadow-card flex items-center"><input type="radio" name="q5_2" value="도움 안될 것 같음" class="hidden" onchange="handleSelect(this, 6, 95)"><span>혜택이 동료에게 크게 도움이 될 것 같지 않아서</span></label>
+            <label class="radio-card cursor-pointer p-4 border rounded-xl shadow-card flex items-center"><input type="radio" name="q5_2" value="혼자 알고 싶음" class="hidden" onchange="handleSelect(this, 6, 95)"><span>혼자만 알고 싶은 정보라서</span></label>
+            <div class="space-y-3">
+                <label class="radio-card cursor-pointer p-4 border rounded-xl shadow-card flex items-center"><input type="radio" name="q5_2" value="기타" class="hidden" onchange="showEtc('q5_2')"><span>기타 (직접 입력)</span></label>
+                <div id="q5_2_etc_wrapper" class="hidden animate-fade-in space-y-3">
+                    <input type="text" id="q5_2_etc" placeholder="내용을 입력해주세요" oninput="validateEtc('q5_2')" class="w-full bg-inputBg px-5 h-14 rounded-xl outline-none focus:ring-2 focus:ring-brand">
+                    <button type="button" id="q5_2_btn" disabled onclick="handleEtcSubmit('q5_2', 6, 95)" class="w-full h-14 bg-gray-200 text-white rounded-2xl font-bold">다음 단계로</button>
+                </div>
+            </div>
+        </div>
+      </div>
+
+      <div id="step-6" class="step-content animate-slide-up">
+        <header class="mb-8">
+            <div class="inline-flex items-center bg-gray-100 text-gray-500 px-3 py-1 rounded-full mb-4 font-bold text-[12px]">마지막 질문</div>
+            <h1 class="text-[24px] font-bold text-[#191F28] leading-[1.3] break-keep">
+                다음번에도 상생 프로젝트가 <br>진행된다면 <span class="text-brand">참여</span>하시겠습니까?
+            </h1>
+        </header>
+        <div class="flex flex-col gap-3 mb-10">
+            <label class="radio-card cursor-pointer p-5 border border-gray-200 rounded-2xl shadow-card transition-all flex items-center justify-between">
+                <input type="radio" name="q6" value="예" class="hidden" onchange="handleFinalSelect(this)">
+                <span class="text-[17px]">네</span>
+                <div class="check-icon w-5 h-5 rounded-full border border-gray-300 flex items-center justify-center transition-all">
+                    <svg class="w-3 h-3 text-white hidden" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"></path></svg>
+                </div>
+            </label>
+            <label class="radio-card cursor-pointer p-5 border border-gray-200 rounded-2xl shadow-card transition-all flex items-center justify-between">
+                <input type="radio" name="q6" value="아니요" class="hidden" onchange="handleFinalSelect(this)">
+                <span class="text-[17px]">아니요</span>
+                <div class="check-icon w-5 h-5 rounded-full border border-gray-300 flex items-center justify-center transition-all">
+                    <svg class="w-3 h-3 text-white hidden" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"></path></svg>
+                </div>
+            </label>
+        </div>
+        <button type="submit" id="final-submit" disabled class="w-full h-16 bg-gray-200 text-white rounded-2xl font-bold text-[18px] transition-all">설문 제출하기</button>
+      </div>
+    </form>
+  </div>
+
+  <div id="success-view" class="hidden flex-col justify-center items-center w-full h-full fixed top-0 left-0 bg-white z-[100] px-6 safe-area-padding">
+      <div class="mb-6 animate-slide-up">
+          <div class="w-20 h-20 bg-brandLight rounded-full flex items-center justify-center mx-auto">
+              <svg class="w-10 h-10 text-brand" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M4.5 12.75l6 6 9-13.5"></path></svg>
+          </div>
+      </div>
+      <h2 class="text-[#191F28] font-bold text-[24px] leading-tight mb-3 text-center animate-slide-up">설문이 제출되었습니다!</h2>
+      <p class="text-[#8B95A1] text-[18px] leading-relaxed text-center animate-slide-up">감사합니다</p>
   </div>
 
   <script>
-    /* =========================================
-       ★ [설정] 제공해주신 구글 시트 웹 앱 URL 적용
-       ========================================= */
-    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwC57kFpzrJftiLPtu7H8EzrI-vBAZjRSPxiyOZnPz618AV5DEDhY9BmeMUJiMijfxx/exec";
-    const ETC_KEY = '기타 (직접 입력)';
-
-    const optionsYes = [
-        { val: '사장님이 QR코드 촬영을 거절하셨어요', text: '사장님이 QR코드 촬영을 거절하셨어요' },
-        { val: '직원분이 QR코드 촬영을 거절하셨어요', text: '직원분이 QR코드 촬영을 거절하셨어요' },
-        { val: 'QR코드 인식이 잘 안됐어요', text: 'QR코드 인식이 잘 안됐어요' },
-        { val: ETC_KEY, text: ETC_KEY }
-    ];
-
-    const optionsNo = [
-        { val: '매장이 너무 바빠서 보여드리지 못했어요', text: '매장이 너무 바빠서 보여드리지 못했어요' }, 
-        { val: '사장님께 말 걸기가 너무 어색했어요', text: '사장님께 말 걸기가 너무 어색했어요' },
-        { val: '매장이 멀거나 방문할 시간이 없었어요', text: '매장이 멀거나 방문할 시간이 없었어요' },
-        { val: '참여 혜택이 부족해서 안 했어요', text: '참여 혜택이 부족해서 안 했어요' },
-        { val: '매장이 닫혀 있었어요', text: '매장이 닫혀 있었어요' }, 
-        { val: ETC_KEY, text: ETC_KEY }
-    ];
-
-    const optionsDontKnow = [
-        { val: '참여하는 방법을 직관적으로 알 수 없었어요', text: '참여하는 방법을 직관적으로 알 수 없었어요' },
-        { val: '보여줘야 할 QR코드가 어디 있는지 못 찾았어요', text: '보여줘야 할 QR코드가 어디 있는지 못 찾았어요' },
-        { val: '설명 메시지가 너무 길고 어려웠어요', text: '설명 메시지가 너무 길고 어려웠어요' },
-        { val: ETC_KEY, text: ETC_KEY }
-    ];
-
+    // 1. 배포한 구글 웹 앱 URL을 여기에 넣으세요
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbz_7Ounm0nC_N0WqW9lB_mC5HkS1A6K_A8_y0X6/exec";
     const progressBar = document.getElementById('progress-bar');
-    const step2Container = document.getElementById('step2-container');
-    const step2Title = document.getElementById('step2-title');
-    const step2Options = document.getElementById('step2-options');
-    const etcInputWrapper = document.getElementById('etc-input-wrapper');
-    const step3Container = document.getElementById('step3-container');
-    const submitBtn = document.getElementById('submit-btn');
-    const finalReasonInput = document.getElementById('finalReasonInput');
-    const storeNameInput = document.getElementById('storeNameInput'); // ★ 추가됨
     
-    let currentFlow = ''; // Y / N / DK
-
-    document.getElementById('submissionId').value = 'SUR-' + Date.now();
-
-    // ★ URL에서 ?store=매장명 읽어오는 코드
-    window.onload = function() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const store = urlParams.get('store');
-        if(store) {
-            storeNameInput.value = store;
-            console.log("매장명 감지됨: " + store);
-        }
-    };
-
-    function handleStep1(answer) {
-        currentFlow = answer;
-        progressBar.style.width = "40%";
-        
-        // UI 초기화
-        step2Container.classList.remove('hidden');
-        step3Container.classList.add('hidden');
-        step3Container.classList.remove('opacity-0');
-        document.querySelectorAll('input[name="rePart"]').forEach(el => el.checked = false);
-
-        setTimeout(() => {
-            step2Container.classList.remove('opacity-0');
-            step2Container.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }, 10);
-
-        step2Options.innerHTML = '';
-        etcInputWrapper.classList.add('hidden');
-        submitBtn.disabled = true;
-        updateSubmitBtn(false);
-        finalReasonInput.value = ""; // 초기화
-
-        let targetOptions, titleText, inputType;
-        
-        if (answer === 'Y') {
-            targetOptions = optionsYes;
-            titleText = '보여드렸는데, 결과는 어땠나요?';
-            inputType = 'radio';
-        } else if (answer === 'N') {
-            targetOptions = optionsNo;
-            titleText = '아쉬워요! 가장 큰 이유는 무엇인가요? (중복 가능)';
-            inputType = 'checkbox';
-        } else { // DK
-            targetOptions = optionsDontKnow;
-            titleText = '죄송해요! 가장 헷갈렸던 점은 무엇인가요? (중복 가능)';
-            inputType = 'checkbox';
-        }
-        
-        step2Title.innerText = titleText;
-
-        targetOptions.forEach(opt => {
-            const label = document.createElement('label');
-            label.className = "radio-card cursor-pointer group";
-            label.innerHTML = `
-                <input type="${inputType}" name="selectionOption" value="${opt.val}" class="peer hidden" onchange="handleOptionChange()">
-                <div class="w-full p-4 rounded-xl border border-gray-200 bg-white shadow-card transition-all flex items-center justify-between hover:bg-gray-50">
-                    <span class="text-[16px] text-gray-600">${opt.text}</span>
-                    <div class="check-icon w-5 h-5 rounded-full border border-gray-300 flex items-center justify-center transition-colors">
-                        <svg class="w-3 h-3 text-white hidden" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
-                    </div>
-                </div>
-            `;
-            step2Options.appendChild(label);
-        });
+    async function sendData(dataObj) {
+        const payload = {
+            submissionId: document.getElementById('submissionId').value,
+            storeName: document.getElementById('storeNameInput').value,
+            utm: document.getElementById('utmInput').value,
+            Timestamp: new Date().toISOString(),
+            ...dataObj
+        };
+        try {
+            fetch(GAS_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                body: JSON.stringify(payload)
+            });
+        } catch(e) { console.error("전송 실패", e); }
     }
 
-    // 체크박스/라디오 변경 시 처리 (통합)
-    function handleOptionChange() {
-        const checkedInputs = document.querySelectorAll('input[name="selectionOption"]:checked');
-        const values = Array.from(checkedInputs).map(input => input.value);
-        
-        finalReasonInput.value = values.join(', ');
+    function handleSelect(input, step, progress) {
+        const data = {};
+        data[input.name] = input.value;
+        sendData(data);
+        nextStep(step, progress);
+    }
 
-        if (values.includes(ETC_KEY)) {
-            etcInputWrapper.classList.remove('hidden');
-        } else {
-            etcInputWrapper.classList.add('hidden');
-        }
+    function handleEtcSubmit(qId, step, progress) {
+        const inputVal = document.getElementById(qId + '_etc').value;
+        const data = {};
+        data[qId] = "기타";
+        data[qId + "_etc"] = inputVal;
+        sendData(data);
+        nextStep(step, progress);
+    }
 
-        if (currentFlow === 'Y') {
-            if (values.length > 0) {
-                progressBar.style.width = "70%";
-                step3Container.classList.remove('hidden');
-                setTimeout(() => {
-                    step3Container.classList.remove('opacity-0');
-                    step3Container.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }, 10);
-                updateSubmitBtn(false); 
-            }
-        } else {
-            if (values.length > 0) {
-                progressBar.style.width = "90%";
-                updateSubmitBtn(true);
-                step3Container.classList.add('hidden');
-            } else {
-                updateSubmitBtn(false); 
-            }
+    function handleFinalSelect(input) {
+        const data = {};
+        data[input.name] = input.value;
+        sendData(data);
+        activateFinalBtn();
+    }
+
+    function nextStep(step, progress) {
+        document.querySelectorAll('.step-content').forEach(el => el.classList.remove('active'));
+        const nextEl = document.getElementById('step-' + step);
+        if(nextEl) {
+            nextEl.classList.add('active');
+            progressBar.style.width = progress + "%";
+            window.scrollTo({top: 0, behavior: 'smooth'});
         }
     }
 
-    function handleStep3() {
-        progressBar.style.width = "90%";
-        updateSubmitBtn(true);
+    function showEtc(qId) {
+        const wrapper = document.getElementById(qId + '_etc_wrapper');
+        wrapper.classList.remove('hidden');
+        window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'});
     }
 
-    function updateSubmitBtn(isActive) {
-        if(isActive) {
-            submitBtn.disabled = false;
-            submitBtn.classList.remove('bg-gray-300', 'shadow-none');
-            submitBtn.classList.add('bg-brand', 'shadow-btn', 'active:scale-[0.98]');
+    function validateEtc(qId) {
+        const input = document.getElementById(qId + '_etc');
+        const btn = document.getElementById(qId + '_btn');
+        if(input.value.trim().length > 0) {
+            btn.disabled = false;
+            btn.classList.replace('bg-gray-200', 'bg-brand');
+            btn.classList.add('shadow-btn');
         } else {
-            submitBtn.disabled = true;
-            submitBtn.classList.add('bg-gray-300', 'shadow-none');
-            submitBtn.classList.remove('bg-brand', 'shadow-btn', 'active:scale-[0.98]');
+            btn.disabled = true;
+            btn.classList.replace('bg-brand', 'bg-gray-200');
+            btn.classList.remove('shadow-btn');
         }
+    }
+
+    function activateFinalBtn() {
+        const btn = document.getElementById('final-submit');
+        btn.disabled = false;
+        btn.classList.replace('bg-gray-200', 'bg-brand');
+        btn.classList.add('shadow-btn');
+        progressBar.style.width = "100%";
     }
 
     document.getElementById('survey-form').addEventListener('submit', function(e) {
         e.preventDefault();
-        submitBtn.innerHTML = `<svg class="animate-spin h-5 w-5 text-white mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> 제출 중...`;
-        progressBar.style.width = "100%";
-
-        const formData = new FormData(this);
-        fetch(GAS_WEB_APP_URL, { 
-             method: 'POST', 
-             body: formData, 
-             mode: 'no-cors' 
-        })
-        .then(() => showSuccess())
-        .catch(() => showSuccess());
+        document.getElementById('main-view').classList.add('hidden');
+        document.querySelector('.fixed.top-0').classList.add('hidden');
+        const successView = document.getElementById('success-view');
+        successView.classList.remove('hidden');
+        successView.classList.add('flex');
     });
 
-    function showSuccess() {
-        document.getElementById('success-view').classList.remove('hidden');
-        document.getElementById('success-view').classList.add('flex');
-    }
+    window.onload = function() {
+        const sid = 'SID-' + Date.now();
+        document.getElementById('submissionId').value = sid;
+        const urlParams = new URLSearchParams(window.location.search);
+        const store = urlParams.get('store') || '';
+        const utm = urlParams.get('utm') || '';
+        document.getElementById('storeNameInput').value = store;
+        document.getElementById('utmInput').value = utm;
+        sendData({ status: "started" });
+    };
   </script>
 </body>
 </html>
